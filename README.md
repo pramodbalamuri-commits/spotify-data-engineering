@@ -46,7 +46,7 @@ Spotify API  ──extract──▶  raw JSON  ──transform──▶  clean t
 - [x] Repo scaffold
 - [ ] Spotify API auth
 - [ ] Extract
-- [ ] Transform
-- [ ] Load to Postgres
+- [x] Transform (Glue job: staging/raw JSON -> datawarehouse Parquet)
+- [x] Load to warehouse (S3 Parquet)
 - [ ] Analytics / modeling
 - [ ] Orchestration
