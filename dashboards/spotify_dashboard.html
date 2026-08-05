@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spotify Listening Analytics</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root[data-theme="dark"]{color-scheme:dark;}
+  .sp-root {
+    --plane:#f4f3f9; --surface:#ffffff; --surface-2:#faf9fd;
+    --ink:#16151d; --ink-2:#56546a; --muted:#8b8a9e;
+    --hairline:rgba(20,19,30,.10); --grid:#e8e7f1;
+    --accent:#4a3aa7; --accent-2:#7a5cf0; --accent-soft:rgba(74,58,167,.10);
+    --track:#eceaf3; --shadow:0 1px 2px rgba(20,19,30,.05),0 8px 24px rgba(20,19,30,.05);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:where(:not([data-theme="light"])) .sp-root{
+      --plane:#0c0b11; --surface:#17161f; --surface-2:#1d1b26;
+      --ink:#f5f4fb; --ink-2:#adaac2; --muted:#817f97;
+      --hairline:rgba(255,255,255,.10); --grid:#272633;
+      --accent:#9085e9; --accent-2:#b7a6ff; --accent-soft:rgba(144,133,233,.15);
+      --track:#26242f; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.35);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"] .sp-root{
+    --plane:#0c0b11; --surface:#17161f; --surface-2:#1d1b26;
+    --ink:#f5f4fb; --ink-2:#adaac2; --muted:#817f97;
+    --hairline:rgba(255,255,255,.10); --grid:#272633;
+    --accent:#9085e9; --accent-2:#b7a6ff; --accent-soft:rgba(144,133,233,.15);
+    --track:#26242f; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+  :root[data-theme="light"] .sp-root{
+    --plane:#f4f3f9; --surface:#ffffff; --surface-2:#faf9fd;
+    --ink:#16151d; --ink-2:#56546a; --muted:#8b8a9e;
+    --hairline:rgba(20,19,30,.10); --grid:#e8e7f1;
+    --accent:#4a3aa7; --accent-2:#7a5cf0; --accent-soft:rgba(74,58,167,.10);
+    --track:#eceaf3; --shadow:0 1px 2px rgba(20,19,30,.05),0 8px 24px rgba(20,19,30,.05);
+    color-scheme:light;
+  }
+  .sp-root{
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:var(--plane); color:var(--ink);
+    min-height:100vh; padding:clamp(20px,4vw,48px);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .sp-wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:28px;}
+  .sp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;}
+  .sp-eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+    font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .sp-eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);border-radius:2px;}
+  .sp-title{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;text-wrap:balance;margin:0 0 8px;}
+  .sp-sub{color:var(--ink-2);font-size:15px;max-width:60ch;margin:0;}
+  .sp-flow{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11.5px;color:var(--muted);}
+  .sp-chip{background:var(--surface-2);border:1px solid var(--hairline);border-radius:999px;
+    padding:3px 10px;font-weight:600;color:var(--ink-2);white-space:nowrap;}
+  .sp-arrow{color:var(--accent);font-weight:700;}
+  .sp-toggle{background:var(--surface);border:1px solid var(--hairline);color:var(--ink-2);
+    border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow);}
+  .sp-toggle:hover{color:var(--ink);border-color:var(--accent);}
+  .sp-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .sp-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:640px){.sp-tiles{grid-template-columns:repeat(2,1fr);}}
+  .sp-tile{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;
+    padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;}
+  .sp-tile .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .sp-tile .v{font-size:30px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .sp-tile .u{font-size:12.5px;color:var(--ink-2);}
+  .sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:760px){.sp-grid{grid-template-columns:1fr;}}
+  .sp-card{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;
+    padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:18px;}
+  .sp-card.wide{grid-column:1 / -1;}
+  .sp-card h2{margin:0;font-size:15px;font-weight:700;letter-spacing:-.01em;}
+  .sp-card .cap{font-size:12.5px;color:var(--muted);margin:-12px 0 0;}
+  .sp-bars{display:flex;flex-direction:column;gap:13px;}
+  .sp-bar-row{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center;}
+  @media(max-width:520px){.sp-bar-row{grid-template-columns:96px 1fr;}}
+  .sp-bar-label{font-size:13px;color:var(--ink-2);font-weight:600;text-align:right;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sp-bar-track{position:relative;background:var(--track);border-radius:6px;height:24px;display:flex;align-items:center;}
+  .sp-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    width:var(--w);min-width:5px;transition:width .9s cubic-bezier(.22,1,.36,1);
+    display:flex;align-items:center;justify-content:flex-end;cursor:default;}
+  @media(prefers-reduced-motion:reduce){.sp-bar-fill{transition:none;}}
+  .sp-bar-val{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);margin-left:9px;white-space:nowrap;}
+  .sp-bar-track:hover .sp-bar-fill{filter:brightness(1.08);}
+  .sp-tip{position:fixed;z-index:50;pointer-events:none;opacity:0;transform:translateY(4px);
+    transition:opacity .12s;background:var(--ink);color:var(--plane);
+    padding:8px 11px;border-radius:9px;font-size:12px;line-height:1.45;box-shadow:var(--shadow);max-width:240px;}
+  .sp-tip.on{opacity:1;transform:translateY(0);}
+  .sp-tablewrap{overflow-x:auto;}
+  table.sp-t{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px;}
+  .sp-t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;padding:0 14px 10px;border-bottom:1px solid var(--hairline);}
+  .sp-t td{padding:12px 14px;border-bottom:1px solid var(--hairline);color:var(--ink-2);}
+  .sp-t td.name{color:var(--ink);font-weight:600;}
+  .sp-t td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .sp-t tr:last-child td{border-bottom:none;}
+  .sp-pop{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end;}
+  .sp-pop i{height:8px;width:44px;background:var(--track);border-radius:4px;overflow:hidden;display:inline-block;}
+  .sp-pop i::after{content:"";display:block;height:100%;width:var(--w);
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px;}
+  .sp-foot{color:var(--muted);font-size:12px;text-align:center;padding-top:4px;line-height:1.7;}
+  .sp-foot code{background:var(--surface-2);border:1px solid var(--hairline);border-radius:5px;padding:1px 6px;font-size:11.5px;}
+</style>
+</head>
+<body>
+<div class="sp-root">
+ <div class="sp-wrap">
+  <header class="sp-head">
+    <div>
+      <div class="sp-eyebrow">Data Engineering · Warehouse Analytics</div>
+      <h1 class="sp-title">Spotify Listening Analytics</h1>
+      <p class="sp-sub">A snapshot of the sample catalog after it moved through the pipeline — three tracks
+        from a Global Top 50 pull, joined to their artists and albums.</p>
+      <div class="sp-flow">
+        <span class="sp-chip">S3 · staging/raw JSON</span><span class="sp-arrow">→</span>
+        <span class="sp-chip">Glue ETL</span><span class="sp-arrow">→</span>
+        <span class="sp-chip">S3 · warehouse Parquet</span><span class="sp-arrow">→</span>
+        <span class="sp-chip">Glue Crawler</span><span class="sp-arrow">→</span>
+        <span class="sp-chip">Athena SQL</span>
+      </div>
+    </div>
+    <button class="sp-toggle" id="spToggle" aria-label="Toggle color theme">
+      <span id="spToggleIcon">◑</span><span id="spToggleText">Theme</span>
+    </button>
+  </header>
+  <section class="sp-tiles">
+    <div class="sp-tile"><span class="k">Tracks</span><span class="v">3</span><span class="u">in the warehouse</span></div>
+    <div class="sp-tile"><span class="k">Artists</span><span class="v">3</span><span class="u">distinct performers</span></div>
+    <div class="sp-tile"><span class="k">Total followers</span><span class="v">117.0<span style="font-size:16px">M</span></span><span class="u">across all artists</span></div>
+    <div class="sp-tile"><span class="k">Avg popularity</span><span class="v">84.7</span><span class="u">track score, 0–100</span></div>
+  </section>
+  <div class="sp-grid">
+    <div class="sp-card wide">
+      <h2>Track popularity</h2>
+      <p class="cap">Spotify popularity score (0–100), most popular first.</p>
+      <div class="sp-bars" id="popBars"></div>
+    </div>
+    <div class="sp-card">
+      <h2>Artists by followers</h2>
+      <p class="cap">Total Spotify followers per artist.</p>
+      <div class="sp-bars" id="folBars"></div>
+    </div>
+    <div class="sp-card">
+      <h2>Genre frequency</h2>
+      <p class="cap">How often each genre tags an artist in the set.</p>
+      <div class="sp-bars" id="genBars"></div>
+    </div>
+  </div>
+  <div class="sp-card">
+    <h2>Track detail</h2>
+    <p class="cap">The star-join Athena runs over tracks → artists → albums.</p>
+    <div class="sp-tablewrap">
+      <table class="sp-t">
+        <thead><tr>
+          <th>Track</th><th>Artist</th><th>Album</th><th>Released</th>
+          <th style="text-align:right">Length</th><th style="text-align:right">Popularity</th>
+        </tr></thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="sp-foot">
+    Source of truth: <code>spotify_db</code> Glue Catalog, queried live via Amazon Athena.<br>
+    Sample data modeled on the Spotify Web API · pipeline: S3 → Glue → Athena.
+  </p>
+ </div>
+</div>
+<div class="sp-tip" id="spTip" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  var root = document.documentElement;
+  var tracks = [
+    {name:"Blinding Lights",   artist:"The Weeknd",  album:"After Hours",                 released:"2020-03-20", pop:92, min:3.33},
+    {name:"Mr. Brightside",    artist:"The Killers", album:"Hot Fuss",                    released:"2004-06-15", pop:84, min:3.70},
+    {name:"Knights of Cydonia",artist:"Muse",        album:"Black Holes and Revelations", released:"2006-07-03", pop:78, min:6.10}
+  ];
+  var artists = [
+    {name:"The Weeknd",  followers:95230000, pop:96},
+    {name:"Muse",        followers:12850000, pop:80},
+    {name:"The Killers", followers: 8940000, pop:82}
+  ];
+  var genres = [
+    {name:"alternative rock", n:2},{name:"pop", n:1},{name:"rock", n:1},
+    {name:"canadian r&b", n:1},{name:"modern rock", n:1}
+  ];
+  var tip = document.getElementById('spTip');
+  function showTip(html,e){ tip.innerHTML=html; tip.classList.add('on'); moveTip(e); }
+  function moveTip(e){
+    var x=e.clientX+14, y=e.clientY+14, w=tip.offsetWidth, h=tip.offsetHeight;
+    if(x+w>innerWidth) x=e.clientX-w-14; if(y+h>innerHeight) y=e.clientY-h-14;
+    tip.style.left=x+'px'; tip.style.top=y+'px';
+  }
+  function hideTip(){ tip.classList.remove('on'); }
+  function fmt(n){ return n.toLocaleString('en-US'); }
+  function fmtM(n){ return (n/1e6).toFixed(2)+'M'; }
+  function bars(el, rows, max, valText, tipHtml){
+    rows.forEach(function(r){
+      var row=document.createElement('div'); row.className='sp-bar-row';
+      var lab=document.createElement('div'); lab.className='sp-bar-label'; lab.textContent=r.name; lab.title=r.name;
+      var track=document.createElement('div'); track.className='sp-bar-track';
+      var fill=document.createElement('div'); fill.className='sp-bar-fill';
+      var val=document.createElement('span'); val.className='sp-bar-val'; val.textContent=valText(r);
+      fill.appendChild(val); track.appendChild(fill); row.appendChild(lab); row.appendChild(track); el.appendChild(row);
+      requestAnimationFrame(function(){ fill.style.setProperty('--w', Math.max(2,(r._v/max)*100)+'%'); });
+      track.addEventListener('mouseenter', function(e){ showTip(tipHtml(r), e); });
+      track.addEventListener('mousemove', moveTip);
+      track.addEventListener('mouseleave', hideTip);
+    });
+  }
+  tracks.forEach(function(t){ t._v=t.pop; });
+  bars(document.getElementById('popBars'), tracks, 100,
+    function(r){ return r.pop; },
+    function(r){ return '<b>'+r.name+'</b><br>'+r.artist+' · '+r.album+'<br>Popularity '+r.pop+' / 100 · '+r.min.toFixed(2)+' min'; });
+  artists.forEach(function(a){ a._v=a.followers; });
+  bars(document.getElementById('folBars'), artists, 95230000,
+    function(r){ return fmtM(r.followers); },
+    function(r){ return '<b>'+r.name+'</b><br>'+fmt(r.followers)+' followers<br>Artist popularity '+r.pop+' / 100'; });
+  genres.forEach(function(g){ g._v=g.n; });
+  bars(document.getElementById('genBars'), genres, 2,
+    function(r){ return r.n; },
+    function(r){ return '<b>'+r.name+'</b><br>tags '+r.n+' artist'+(r.n>1?'s':''); });
+  var tb=document.getElementById('tblBody');
+  tracks.forEach(function(t){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="name">'+t.name+'</td><td>'+t.artist+'</td><td>'+t.album+'</td><td>'+t.released+
+      '</td><td class="num">'+t.min.toFixed(2)+' min</td><td class="num"><span class="sp-pop"><i style="--w:'+t.pop+'%"></i>'+t.pop+'</span></td>';
+    tb.appendChild(tr);
+  });
+  var icon=document.getElementById('spToggleIcon'), txt=document.getElementById('spToggleText');
+  function current(){ var s=root.getAttribute('data-theme'); if(s) return s;
+    return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'; }
+  function paint(){ var d=current()==='dark'; icon.textContent=d?'☀':'☾'; txt.textContent=d?'Light':'Dark'; }
+  document.getElementById('spToggle').addEventListener('click', function(){
+    root.setAttribute('data-theme', current()==='dark'?'light':'dark'); paint(); });
+  paint();
+})();
+</script>
+</body>
+</html>

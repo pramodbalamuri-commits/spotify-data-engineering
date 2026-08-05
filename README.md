@@ -5,6 +5,23 @@ transform it, and load it into a database for analytics.
 
 > 🚧 Built step by step. This README and structure will grow as the pipeline develops.
 
+## 📖 Start here
+
+- **[docs/AWS_PIPELINE_GUIDE.md](./docs/AWS_PIPELINE_GUIDE.md)** — the complete build guide:
+  every AWS service explained, exact commands to recreate the whole pipeline from scratch,
+  errors we hit + how we fixed them, why the design is good (and alternatives),
+  interview Q&A, and what a data engineer does with this in real life.
+- **[dashboards/spotify_dashboard.html](./dashboards/spotify_dashboard.html)** — open in a
+  browser; analytics dashboard (popularity / followers / genres) built from the Athena output.
+
+## What we built (AWS)
+
+```
+Spotify JSON → S3 staging/raw → Glue ETL (PySpark) → S3 datawarehouse (Parquet)
+             → Glue Crawler → Glue Data Catalog (spotify_db) → Athena SQL → dashboard
+```
+IAM user `spotify-project` + Glue service role authorize it. Region `us-west-2`.
+
 ## Goal
 
 Move Spotify data (tracks, artists, albums, playlists, listening history) through a
