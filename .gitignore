@@ -1,0 +1,27 @@
+# Secrets / credentials
+.env
+*.env
+config/secrets.*
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Data (don't commit raw/large data)
+data/raw/
+data/staging/
+data/*.csv
+data/*.json
+data/*.parquet
+*.db
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
