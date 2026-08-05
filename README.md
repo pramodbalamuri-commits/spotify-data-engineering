@@ -48,5 +48,5 @@ Spotify API  ──extract──▶  raw JSON  ──transform──▶  clean t
 - [ ] Extract
 - [x] Transform (Glue job: staging/raw JSON -> datawarehouse Parquet)
 - [x] Load to warehouse (S3 Parquet)
-- [ ] Analytics / modeling
+- [x] Catalog (Glue crawler -> spotify_db) + Athena SQL
 - [ ] Orchestration
